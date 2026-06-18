@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Color Catch!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1d2c5e, #3b4cca);
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Top Header & Scoreboard Section */
+        .header-section {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            color: #ffcb05;
+            font-size: 3rem;
+            margin: 0;
+            text-shadow: 3px 3px #1d2c5e, -2px -2px 0 #1d2c5e, 2px -2px 0 #1d2c5e, -2px 2px 0 #1d2c5e;
+            font-family: 'Impact', sans-serif;
+            letter-spacing: 2px;
+        }
+
+        .scoreboard {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+            background: #ffcb05;
+            color: #1d2c5e;
+            padding: 10px 30px;
+            border-radius: 30px;
+            border: 4px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Main Game Layout Area */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            width: 100%;
+            gap: 20px;
+        }
+
+        /* Prompt Display Box */
+        .prompt-box {
+            background: #fff;
+            border: 8px solid #ffcb05;
+            border-radius: 25px;
+            padding: 20px 60px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            width: 60%;
+            max-width: 800px;
+        }
+
+        .instruction {
+            font-size: 1.8rem;
+            color: #444;
+            margin: 0 0 10px 0;
+            font-weight: bold;
+        }
+
+        .target-word {
+            font-size: 5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin: 0;
+            text-shadow: 2px 2px #000;
+        }
+
+        /* Maximized Color Buttons Grid */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            width: 80%;
+            max-width: 1000px;
+            flex-grow: 0.5;
+            max-height: 50vh;
+        }
+
+        .color-btn {
+            border: 6px solid #fff;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Minimal clean Pokeball line look */
+        .color-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background: rgba(0,0,0,0.15);
+            transform: translateY(-50%);
+        }
+
+        .color-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.03);
+            border-color: #ffcb05;
+        }
+
+        /* Mascot Prompt Bottom Bar */
+        .mascot-bar {
+            width: 100%;
+            background: #ffcb05;
+            color: #1d2c5e;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            border-radius: 15px;
+            border: 4px solid #fff;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Score milestone animations */
+        @keyframes correct-flash {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); border-color: #4CAF50; }
+        }
+
+        .correct-bounce {
+            animation: correct-flash 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section with Title and Live Score -->
+    <div class="header-section">
+        <h1>POKÉMON COLOR CATCH!</h1>
+        <div class="scoreboard">
+            Score: <span id="score">0</span> 🔴
+        </div>
+    </div>
+
+    <!-- Main Dynamic Gameplay Area -->
+    <div class="main-content">
+        <div class="prompt-box" id="promptBox">
+            <p class="instruction">Read the word and click the matching color!</p>
+            <p class="target-word" id="targetWord">YELLOW</p>
+        </div>
+
+        <div class="color-grid" id="colorGrid">
+            <!-- 9 Dynamic Color Blocks will render here -->
+        </div>
+    </div>
+
+    <!-- Interactive Bottom Mascot Banner -->
+    <div class="mascot-bar" id="mascotText">
+        ⚡ Pikachu wants you to find the color!
+    </div>
+
+    <script>
+        // Game Configuration array utilizing all 9 specified vocabulary words
+        const colors = [
+            { name: 'yellow', hex: '#FFDE00', mascot: '⚡ Pikachu wants you to find yellow!' },
+            { name: 'red', hex: '#FF0000', mascot: '🔥 Charizard demands red!' },
+            { name: 'green', hex: '#4CAF50', mascot: '🍃 Bulbasaur loves green!' },
+            { name: 'blue', hex: '#2196F3', mascot: '💧 Squirtle is looking for blue!' },
+            { name: 'black', hex: '#212121', mascot: '🌙 Umbreon blends into the black!' },
+            { name: 'white', hex: '#FFFFFF', mascot: '💨 Togepi is looking for white!' },
+            { name: 'pink', hex: '#E91E63', mascot: '🎤 Jigglypuff sings for pink!' },
+            { name: 'brown', hex: '#795548', mascot: '🤎 Eevee is perfectly brown!' },
+            { name: 'purple', hex: '#9C27B0', mascot: '🔮 Gengar fades into purple!' }
+        ];
+
+        let score = 0;
+        let currentTarget;
+
+        const targetWordElement = document.getElementById('targetWord');
+        const scoreElement = document.getElementById('score');
+        const colorGrid = document.getElementById('colorGrid');
+        const promptBox = document.getElementById('promptBox');
+        const mascotText = document.getElementById('mascotText');
+
+        // Synthesizes an instant retro 8-bit sound chip "Ding" effect without needing external files
+        function playCorrectSound() {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            // Play an arpeggio chord note jump (C5 to G5) for a rewarding sound
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.08); 
+            
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.35);
+        }
+
+        // Logic to randomize and update layout elements for each round
+        function nextRound() {
+            // Pick a random target color object
+            const randomIndex = Math.floor(Math.random() * colors.length);
+            currentTarget = colors[randomIndex];
+
+            // Update text elements
+            targetWordElement.innerText = currentTarget.name;
+            mascotText.innerText = currentTarget.mascot;
+
+            // Educational Twist: Change the font color to a random WRONG color 
+            // This tests that students are reading the text instead of just matching colors visually.
+            let mismatchedColor;
+            do {
+                mismatchedColor = colors[Math.floor(Math.random() * colors.length)].hex;
+            } while (mismatchedColor === currentTarget.hex);
+            
+            targetWordElement.style.color = mismatchedColor;
+
+            // Re-shuffle and build the 9-grid panel block
+            colorGrid.innerHTML = '';
+            const shuffledColors = [...colors].sort(() => Math.random() - 0.5);
+
+            shuffledColors.forEach(color => {
+                const btn = document.createElement('button');
+                btn.className = 'color-btn';
+                btn.style.backgroundColor = color.hex;
+                
+                // Add a grey outline helper specifically for the white box selection
+                if(color.name === 'white') {
+                    btn.style.borderColor = '#ccc';
+                }
+
+                btn.onclick = () => checkAnswer(color.name);
+                colorGrid.appendChild(btn);
+            });
+        }
+
+        // Evaluate standard click condition
+        function checkAnswer(selectedName) {
+            if (selectedName === currentTarget.name) {
+                // Correct path behavior
+                score++;
+                scoreElement.innerText = score;
+                playCorrectSound();
+
+                // Visual response flash feedback
+                promptBox.classList.add('correct-bounce');
+                setTimeout(() => {
+                    promptBox.classList.remove('correct-bounce');
+                    nextRound();
+                }, 300);
+
+            } else {
+                // Wrong selection penalty response effect (shake shake animation)
+                promptBox.style.transform = 'translateX(15px)';
+                setTimeout(() => promptBox.style.transform = 'translateX(-15px)', 40);
+                setTimeout(() => promptBox.style.transform = 'translateX(0)', 80);
+            }
+        }
+
+        // Initialize the game layout state loop
+        nextRound();
+    </script>
+</body>
+</html>
