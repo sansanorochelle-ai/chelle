@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>"Do You Like...?" Food Survey Game</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --like: #2ecc71;
+            --dislike: #e74c3c;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #eef2f7;
+            color: var(--dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .navbar {
+            background-color: var(--dark);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .nav-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover { background: rgba(255,255,255,0.2); }
+        .tab-btn.active { background: var(--primary); box-shadow: 0 2px 5px rgba(74, 144, 226, 0.4); }
+
+        .view-panel {
+            flex: 1;
+            display: none;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .view-panel.active { display: flex; }
+
+        /* TEACHER SETUP VIEW */
+        #setup-view {
+            padding: 25px;
+            overflow-y: auto;
+            background: #f0f4f8;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .setup-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .setup-card h2 {
+            margin-bottom: 5px;
+            color: var(--dark);
+            padding-bottom: 8px;
+            font-size: 1.25rem;
+        }
+        
+        .setup-card p.subtitle {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f4f8;
+            padding-bottom: 10px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-group input[type="file"] {
+            padding: 7px;
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-success { background-color: var(--like); color: white; }
+        .btn-danger { background-color: var(--dislike); color: white; }
+        .btn-dark { background-color: var(--dark); color: white; }
+
+        .item-list-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .item-list-table th, .item-list-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eef2f7; }
+        .item-list-table th { background-color: #f8f9fa; font-weight: 600; }
+        .thumb-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+
+        /* GAME PLAY VIEW */
+        #pos-view { background-size: cover; background-position: center; background-repeat: no-repeat; }
+        .pos-container {
+            flex: 1;
+            display: flex;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(5px);
+            width: 100%; height: 100%;
+        }
+
+        .menu-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .question-banner {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .grid-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-auto-rows: max-content;
+            gap: 25px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        /* Giant Interactive Food Card */
+        .food-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            border: 2px solid transparent;
+            position: relative;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .food-card img { width: 100%; height: 200px; object-fit: cover; background-color: #f1f2f6; }
+        .food-info { padding: 15px; text-align: center; }
+        
+        .food-name { font-weight: bold; font-size: 1.6rem; color: var(--dark); margin-bottom: 12px; text-transform: lowercase; }
+        
+        .choice-actions { display: flex; gap: 12px; width: 100%; padding: 0 15px 15px 15px; }
+        .choice-actions .btn { flex: 1; padding: 14px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; }
+
+        /* Response Overlay Message Inside Card */
+        .response-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 200px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            z-index: 2;
+        }
+        .food-card.liked-mode .response-overlay.like-msg { display: flex; background: rgba(46, 204, 113, 0.85); }
+        .food-card.disliked-mode .response-overlay.dislike-msg { display: flex; background: rgba(231, 76, 60, 0.85); }
+
+        /* End Game Presentation Popup Overlay */
+        .popup-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .popup-box {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 800px; /* Widened to fit big font sentences perfectly */
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .summary-block { margin: 25px 0; text-align: left; background: #f8f9fa; padding: 24px; border-radius: 12px; }
+        .summary-block h4 { margin-bottom: 12px; font-size: 1.5rem; }
+
+        /* Footer buttons inside game display */
+        .game-footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #cbd5e1;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="nav-title">🍕 "Do You Like...?" Game Board</div>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchView('pos')">Game Screen</button>
+            <button class="tab-btn" onclick="switchView('setup')">⚙️ Teacher Setup</button>
+        </div>
+    </div>
+
+    <div id="pos-view" class="view-panel active">
+        <div class="pos-container">
+            
+            <div class="menu-section">
+                <div class="question-banner" id="current-question-prompt">
+                    Do you like... food?
+                </div>
+                <div class="grid-container" id="menu-grid">
+                    </div>
+
+                <div class="game-footer-actions">
+                    <button class="btn btn-danger" onclick="resetSurvey()">Reset</button>
+                    <button class="btn btn-primary" onclick="showSummaryPopup()">Finish! 🎉</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="popup-overlay" id="summary-popup">
+            <div class="popup-box">
+                <h2 style="margin-bottom: 15px; color: var(--primary); font-size: 2.5rem;">🗣️ Time to Speak!</h2>
+                <p style="color: #555; margin-bottom: 20px; font-size: 1.4rem;">Stand up and practice saying your sentences out loud:</p>
+                
+                <div class="summary-block" style="border-left: 8px solid var(--like);">
+                    <h4 style="color: var(--like);">"I like..."</h4>
+                    <p id="popup-likes-sentence" style="font-size: 2.4rem; font-weight: 700; color: #111; line-height: 1.5; letter-spacing: 0.5px;"></p>
+                </div>
+
+                <div class="summary-block" style="border-left: 8px solid var(--dislike);">
+                    <h4 style="color: var(--dislike);">"I don't like..."</h4>
+                    <p id="popup-dislikes-sentence" style="font-size: 2.4rem; font-weight: 700; color: #111; line-height: 1.5; letter-spacing: 0.5px;"></p>
+                </div>
+
+                <button class="btn btn-primary" style="width:100%; margin-top:25px; padding: 18px; font-size: 1.5rem; border-radius: 10px;" onclick="closePopup()">Next Student 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="setup-view" class="view-panel">
+        
+        <div class="setup-card" style="background: #eef2f7; border: 2px dashed #cbd5e1;">
+            <h2>💾 Save & Load Game Setups</h2>
+            <p class="subtitle">Save your current food lists and themes to your computer, or load an old lesson plan file instantly.</p>
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <button class="btn btn-dark" onclick="exportSetupToJSON()">📥 Download Setup File (JSON)</button>
+                <div style="display: flex; align-items: center; gap: 8px; background: white; padding: 6px 12px; border-radius: 6px; border: 1px solid #ced4da;">
+                    <label style="font-weight: bold; font-size: 0.9rem; white-space: nowrap; margin: 0;">📤 Load Setup:</label>
+                    <input type="file" id="json-load-input" accept=".json" onchange="importSetupFromJSON(event)" style="border: none; padding: 0; background: transparent; width: auto;">
+                </div>
+            </div>
+        </div>
+
+        <div class="setup-card">
+            <h2>🎨 Game Board Theme Customization</h2>
+            <p class="subtitle">Personalize your game design canvas settings.</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div class="form-group">
+                    <label>Classroom background image (Upload file)</label>
+                    <input type="file" id="setup-bg-file" accept="image/*" onchange="handleBgImageUpload(event)">
+                </div>
+                <div class="form-group">
+                    <label>Background classroom loop music file (.mp3)</label>
+                    <input type="file" id="setup-bgm-file" accept="audio/mp3, audio/*" onchange="handleBgmAudioUpload(event)">
+                </div>
+            </div>
+            <button class="btn" id="music-toggle-btn" onclick="toggleMusic()" style="background:#7f8c8d; color:white;">🎵 Play Music</button>
+        </div>
+
+        <div class="setup-card">
+            <h2>🍎 Upload Target Food Flashcards</h2>
+            <p class="subtitle">You can select and upload multiple food pictures at the same time. The game will automatically name them based on your file names.</p>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px dashed #4a90e2;">
+                <div class="form-group" style="margin: 0;">
+                    <label style="color: var(--primary); font-size: 1rem;">Select food images:</label>
+                    <input type="file" id="bulk-food-images" accept="image/*" multiple onchange="handleBulkImagesUpload(event)">
+                </div>
+            </div>
+        </div>
+
+        <div class="setup-card" style="flex: 1;">
+            <h2>📋 Current Active Food Vocabulary Cards</h2>
+            <p class="subtitle">Review your active card inventory deck below. You can double-click or type inside any word box to correct spelling typos.</p>
+            <div style="overflow-x: auto;">
+                <table class="item-list-table">
+                    <thead>
+                        <tr>
+                            <th>Image preview</th>
+                            <th>Food target word (Click text box to change)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="setup-items-table-body">
+                        </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 15px; text-align: right;">
+                <button class="btn btn-danger" onclick="clearAllCards()">🗑️ Clear Entire Deck</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="bg-audio-engine" loop></audio>
+
+    <script>
+        let foodInventory = [
+            { id: 1, name: "pizza", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600" },
+            { id: 2, name: "broccoli", img: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=600" },
+            { id: 3, name: "ice cream", img: "https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=600" },
+            { id: 4, name: "apples", img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600" },
+            { id: 5, name: "fish", img: "https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?w=600" }
+        ];
+
+        let studentLikes = [];
+        let studentDislikes = [];
+        let isMusicPlaying = false;
+        
+        let themeSettings = {
+            bgUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1600", 
+            bgmUrl: ""
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            applyEnvironmentStyles();
+            renderPOSMenuGrid();
+            renderSetupInventoryTable();
+        });
+
+        function switchView(viewName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+
+            if (viewName === 'pos') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('pos-view').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('setup-view').classList.add('active');
+            }
+        }
+
+        function applyEnvironmentStyles() {
+            const posPanel = document.getElementById('pos-view');
+            posPanel.style.backgroundImage = themeSettings.bgUrl.trim() !== "" ? `url('${themeSettings.bgUrl}')` : 'none';
+
+            const audioElement = document.getElementById('bg-audio-engine');
+            if(themeSettings.bgmUrl.trim() !== "") {
+                audioElement.src = themeSettings.bgmUrl;
+                if(isMusicPlaying) {
+                    audioElement.play().catch(e => console.log("Audio play deferred"));
+                }
+            } else {
+                audioElement.src = "";
+            }
+        }
+
+        function handleBgImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                themeSettings.bgUrl = e.target.result;
+                applyEnvironmentStyles();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleBgmAudioUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                themeSettings.bgmUrl = e.target.result;
+                const audio = document.getElementById('bg-audio-engine');
+                audio.pause();
+                isMusicPlaying = false;
+                document.getElementById('music-toggle-btn').innerText = "🎵 Play Music";
+                document.getElementById('music-toggle-btn').style.background = "#7f8c8d";
+                applyEnvironmentStyles();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function toggleMusic() {
+            const audio = document.getElementById('bg-audio-engine');
+            const btn = document.getElementById('music-toggle-btn');
+            
+            if(!themeSettings.bgmUrl || themeSettings.bgmUrl.trim() === "") {
+                alert("Please upload an .mp3 audio file track first!");
+                return;
+            }
+
+            if(isMusicPlaying) {
+                audio.pause();
+                btn.innerText = "🎵 Play Music";
+                btn.style.background = "#7f8c8d";
+                isMusicPlaying = false;
+            } else {
+                audio.play().then(() => {
+                    btn.innerText = "⏸️ Pause Music";
+                    btn.style.background = "var(--primary)";
+                    isMusicPlaying = true;
+                }).catch(() => alert("Sound layout processing failed. Check track asset type."));
+            }
+        }
+
+        function handleBulkImagesUpload(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            let loadedCount = 0;
+
+            files.forEach((file) => {
+                const reader = new FileReader();
+                
+                let autoCalculatedName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                autoCalculatedName = autoCalculatedName.replace(/[-_]/g, ' ').toLowerCase().trim();
+
+                reader.onload = function(e) {
+                    foodInventory.push({
+                        id: Date.now() + Math.random(), 
+                        name: autoCalculatedName,
+                        img: e.target.result
+                    });
+
+                    loadedCount++;
+                    if (loadedCount === files.length) {
+                        renderPOSMenuGrid();
+                        renderSetupInventoryTable();
+                        document.getElementById('bulk-food-images').value = ''; 
+                        alert(`Successfully imported ${loadedCount} new food cards to your deck!`);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderPOSMenuGrid() {
+            const container = document.getElementById('menu-grid');
+            container.innerHTML = "";
+
+            foodInventory.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "food-card";
+
+                let cardClass = "";
+                if (studentLikes.includes(item.name)) cardClass = "liked-mode";
+                if (studentDislikes.includes(item.name)) cardClass = "disliked-mode";
+                if (cardClass) card.className += " " + cardClass;
+
+                const imgSrc = item.img ? item.img : "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400";
+
+                card.innerHTML = `
+                    <div class="response-overlay like-msg">Yes, I do. 👍</div>
+                    <div class="response-overlay dislike-msg">No, I don't. 👎</div>
+                    <img src="${imgSrc}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400';">
+                    <div class="food-info">
+                        <div class="food-name">${item.name}</div>
+                    </div>
+                    <div class="choice-actions">
+                        <button class="btn btn-success" onclick="sortFood('${item.name}', 'like')">👍 Like</button>
+                        <button class="btn btn-danger" onclick="sortFood('${item.name}', 'dislike')">👎 No</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function sortFood(foodName, preferences) {
+            studentLikes = studentLikes.filter(f => f !== foodName);
+            studentDislikes = studentDislikes.filter(f => f !== foodName);
+
+            if(preferences === 'like') {
+                studentLikes.push(foodName);
+                playChimeSound(1000, 'sine'); 
+            } else {
+                studentDislikes.push(foodName);
+                playChimeSound(250, 'triangle'); 
+            }
+
+            document.getElementById('current-question-prompt').innerHTML = `Do you like... <span style="text-decoration:underline; color:#ffeaa7; text-transform:lowercase;">${foodName}</span>?`;
+            renderPOSMenuGrid();
+        }
+
+        function resetSurvey() {
+            studentLikes = [];
+            studentDislikes = [];
+            document.getElementById('current-question-prompt').innerHTML = `Do you like... <span style="text-decoration: underline; color: #ffeaa7;">food</span>?`;
+            renderPOSMenuGrid();
+        }
+
+        function playChimeSound(frequency, type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(frequency, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+                osc.stop(ctx.currentTime + 0.2);
+            } catch(e) { console.log('Audio tracking bypassed'); }
+        }
+
+        function showSummaryPopup() {
+            if(studentLikes.length === 0 && studentDislikes.length === 0) {
+                alert("Please sort some food items before finishing!");
+                return;
+            }
+
+            const likesSentence = studentLikes.length > 0 ? "I like " + studentLikes.join(', ') + "." : "No foods chosen.";
+            const dislikesSentence = studentDislikes.length > 0 ? "I don't like " + studentDislikes.join(', ') + "." : "No foods chosen.";
+
+            document.getElementById('popup-likes-sentence').innerText = likesSentence;
+            document.getElementById('popup-dislikes-sentence').innerText = dislikesSentence;
+            document.getElementById('summary-popup').style.display = "flex";
+        }
+
+        function closePopup() {
+            document.getElementById('summary-popup').style.display = "none";
+            resetSurvey();
+        }
+
+        function renderSetupInventoryTable() {
+            const body = document.getElementById('setup-items-table-body');
+            body.innerHTML = "";
+
+            foodInventory.forEach(item => {
+                const tr = document.createElement('tr');
+                const fallbackImg = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100";
+                
+                tr.innerHTML = `
+                    <td><img src="${item.img || fallbackImg}" class="thumb-preview" onerror="this.src='${fallbackImg}';"></td>
+                    <td>
+                        <input type="text" value="${item.name}" 
+                               style="width: 90%; max-width: 300px; padding: 6px 10px; font-weight: 600; border: 1px solid #cbd5e1; border-radius: 4px; text-transform: lowercase;" 
+                               onchange="updateCardName(${item.id}, this.value)">
+                    </td>
+                    <td><button class="btn btn-danger" style="padding:4px 10px;" onclick="deleteInventoryItem(${item.id})">Remove</button></td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function updateCardName(id, newValue) {
+            const targetItem = foodInventory.find(f => f.id === id);
+            if (targetItem) {
+                const legacyName = targetItem.name;
+                const optimizedValue = newValue.toLowerCase().trim();
+                
+                targetItem.name = optimizedValue;
+
+                studentLikes = studentLikes.map(f => f === legacyName ? optimizedValue : f);
+                studentDislikes = studentDislikes.map(f => f === legacyName ? optimizedValue : f);
+
+                renderPOSMenuGrid();
+            }
+        }
+
+        function deleteInventoryItem(id) {
+            if(confirm("Delete this food card from the active survey rotation deck?")) {
+                const item = foodInventory.find(f => f.id === id);
+                if(item) {
+                    studentLikes = studentLikes.filter(f => f !== item.name);
+                    studentDislikes = studentDislikes.filter(f => f !== item.name);
+                }
+                foodInventory = foodInventory.filter(i => i.id !== id);
+                renderPOSMenuGrid();
+                renderSetupInventoryTable();
+            }
+        }
+
+        function clearAllCards() {
+            if(confirm("Are you sure you want to delete all cards? This will empty the game screen.")) {
+                foodInventory = [];
+                resetSurvey();
+                renderPOSMenuGrid();
+                renderSetupInventoryTable();
+            }
+        }
+
+        function exportSetupToJSON() {
+            const packageData = {
+                themeSettings: themeSettings,
+                foodInventory: foodInventory
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(packageData));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "lesson_pos_setup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importSetupFromJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    
+                    if(parsed.themeSettings && parsed.foodInventory) {
+                        themeSettings = parsed.themeSettings;
+                        foodInventory = parsed.foodInventory;
+                        
+                        const audio = document.getElementById('bg-audio-engine');
+                        audio.pause();
+                        isMusicPlaying = false;
+                        document.getElementById('music-toggle-btn').innerText = "🎵 Play Music";
+                        document.getElementById('music-toggle-btn').style.background = "#7f8c8d";
+
+                        applyEnvironmentStyles();
+                        renderPOSMenuGrid();
+                        renderSetupInventoryTable();
+                        resetSurvey();
+                        
+                        alert("Lesson package data loaded successfully!");
+                    } else {
+                        alert("Invalid file template schema. Please check file properties.");
+                    }
+                } catch (err) {
+                    alert("Error parsing selection template. Ensure target is valid JSON.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; 
+        }
+    </script>
+</body>
+</html>
