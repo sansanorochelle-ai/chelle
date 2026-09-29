@@ -1,49 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classroom Games Hub</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f9;
-            padding: 50px;
-        }
-        h1 { color: #333; }
-        .menu {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .game-button {
-            display: inline-block;
-            padding: 20px 40px;
-            font-size: 20px;
-            font-weight: bold;
-            color: white;
-            background-color: #007bff;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-        .game-button:hover { background-color: #0056b3; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#121b38">
+  <title>Teacher Chelle's Classroom Games</title>
+  <meta name="description" content="Fun, interactive English games for Teacher Chelle's classroom.">
+  <style>
+    :root { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color:#f8f8ff; background:#101831; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 15% 5%,#293e77 0,transparent 38%),radial-gradient(circle at 95% 70%,#24465a 0,transparent 35%),#101831; }
+    a { color:inherit; }
+    .wrap { width:min(1120px,calc(100% - 36px)); margin:auto; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:18px; padding:24px 0; }
+    .brand { font-size:1.18rem; font-weight:850; text-decoration:none; letter-spacing:.01em; }
+    .brand span { color:#ffdc7e; }
+    nav a { text-decoration:none; font-weight:700; color:#d9e6ff; }
+    nav a:hover,nav a:focus-visible { color:#ffdc7e; }
+    .hero { padding:70px 0 56px; max-width:760px; }
+    .eyebrow { color:#8cebd7; text-transform:uppercase; font-weight:800; letter-spacing:.15em; font-size:.81rem; }
+    h1 { font-size:clamp(2.7rem,7vw,5.4rem); letter-spacing:-.055em; line-height:1.03; margin:15px 0 20px; }
+    h1 span { color:#ffdc7e; }
+    .intro { color:#c9d5ed; font-size:clamp(1.05rem,2vw,1.3rem); line-height:1.6; max-width:630px; }
+    .primary { display:inline-flex; align-items:center; gap:10px; margin-top:16px; background:#ffdc7e; color:#1b2441; padding:15px 22px; border-radius:14px; font-weight:850; text-decoration:none; box-shadow:0 6px 0 #c49b44; }
+    .primary:hover,.primary:focus-visible { background:#fff0b9; transform:translateY(-2px); }
+    .section-head { display:flex; justify-content:space-between; align-items:end; gap:12px; margin-bottom:22px; }
+    h2 { font-size:clamp(1.65rem,3vw,2.3rem); margin:0; }
+    .section-head p { color:#bdcce8; margin:0; }
+    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; padding-bottom:85px; }
+    .card { display:flex; flex-direction:column; min-height:330px; border:1px solid #7080b266; border-radius:24px; background:#1c2949; overflow:hidden; text-decoration:none; box-shadow:0 16px 35px #050e2440; transition:transform .18s, border-color .18s; }
+    .card:hover,.card:focus-visible { transform:translateY(-5px); border-color:#ffdc7e; outline:none; }
+    .art { display:grid; place-items:center; min-height:160px; font-size:5rem; }
+    .fruit { background:linear-gradient(135deg,#ff9b79,#d74975); }
+    .color { background:linear-gradient(135deg,#6478e7,#a65dd0); }
+    .food { background:linear-gradient(135deg,#41bba7,#278391); }
+    .body { display:flex; flex:1; flex-direction:column; padding:23px; }
+    .tag { color:#9fe6d8; font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; font-weight:800; }
+    h3 { font-size:1.35rem; margin:9px 0; }
+    .body p { color:#bdcce8; line-height:1.5; margin:0 0 20px; }
+    .play { color:#ffdc7e; font-weight:800; margin-top:auto; }
+    footer { border-top:1px solid #ffffff24; color:#aebed9; padding:27px 0 38px; font-size:.9rem; }
+    @media(max-width:800px) { .grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media(max-width:560px) { header { padding:18px 0; } .grid { grid-template-columns:1fr; } .hero { padding:46px 0; } .section-head { display:block; } .section-head p { margin-top:8px; } .card { min-height:300px; } }
+  </style>
 </head>
 <body>
-
-    <h1>🎮 Classroom Games Hub 🎮</h1>
-    <p>Select a game to play with the class:</p>
-
-    <div class="menu">
-        <a class="game-button" href="color-game/index.html">Color Game</a>
-
-        <a class="game-button" href="do-you-like-food/index.html">Do You Like Food?</a>
-
-        <a class="game-button" href="fruit-slash/index.html">Fruit Slash Vocabulary</a>
-    </div>
-
+  <div class="wrap">
+    <header><a class="brand" href="./">✨ Teacher <span>Chelle</span></a><nav><a href="#games">Explore games</a></nav></header>
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Learn English through play</div>
+        <h1>Classroom games that make words <span>stick.</span></h1>
+        <p class="intro">Choose a game, gather your students, and play together. Built for quick vocabulary practice and lively English lessons.</p>
+        <a class="primary" href="#games">Explore the games <span aria-hidden="true">↗</span></a>
+      </section>
+      <section id="games" aria-labelledby="games-title">
+        <div class="section-head"><h2 id="games-title">Choose a game</h2><p>Tap a card to start playing.</p></div>
+        <div class="grid">
+          <a class="card" href="fruit-slash/index.html"><div class="art fruit" aria-hidden="true">🍍</div><div class="body"><div class="tag">Fruit vocabulary</div><h3>Fruit Slash</h3><p>Read the target word, then slash the matching fruits. Play solo or with two teams.</p><span class="play">Play game →</span></div></a>
+          <a class="card" href="color-game/index.html"><div class="art color" aria-hidden="true">🎨</div><div class="body"><div class="tag">Colors</div><h3>Color Game</h3><p>Practice color words in an interactive classroom game.</p><span class="play">Play game →</span></div></a>
+          <a class="card" href="do-you-like-food/index.html"><div class="art food" aria-hidden="true">🍜</div><div class="body"><div class="tag">Food and speaking</div><h3>Do You Like Food?</h3><p>Practice food vocabulary and answer simple questions.</p><span class="play">Play game →</span></div></a>
+        </div>
+      </section>
+    </main>
+    <footer>Made for Teacher Chelle's English classroom ✨</footer>
+  </div>
 </body>
 </html>
